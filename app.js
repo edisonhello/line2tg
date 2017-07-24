@@ -2,6 +2,7 @@ var config = require('./config.json')
 var fs = require('fs')
 
 var Linebot = require('linebot')
+var tgbotapi = require('telegram-bot-api')
 var express = require('express')
 var app = express()
 
@@ -15,6 +16,13 @@ var linebot = Linebot({
 })
 var linebotParser = linebot.parser()
 app.post('/', linebotParser)
+
+var tgbot = new tgbotapi({
+    token: config.token,
+    updates: {
+        enabled: true
+    }
+})
 
 linebot.on('message', e => {
     console.log(e)
@@ -30,4 +38,7 @@ linebot.on('message', e => {
             })
         })
     }
+})
+tgbot.on('message', msg => {
+    console.log(msg)
 })
