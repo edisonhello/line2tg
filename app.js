@@ -1,4 +1,5 @@
 var config = require('./config.json')
+var fs = require('fs')
 
 var Linebot = require('linebot')
 var express = require('express')
@@ -23,8 +24,10 @@ linebot.on('message', e => {
         })
     }
     if(e.message.type == 'image'){
-        e.message.content().then((a, b, c, d) => {
-            console.log(a,b,c,d)
+        e.message.content().then(pic64 => {
+            fs.writeFile('newpic.jpg', pic64, 'binary', err => {
+                if(err) throw err
+            })
         })
     }
 })
