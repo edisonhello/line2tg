@@ -1,13 +1,11 @@
 const config = require('./config.json')
 const fs = require('fs')
+const colors = require('colors')
 
 const Linebot = require('linebot')
 const tgbotapi = require('telegram-bot-api')
 const express = require('express')
 const app = express()
-
-const port = config.port || 3000
-app.listen(port, () => console.log('server is running at port', port))
 
 const linebot = Linebot({
     channelId: config.channelID,
@@ -24,27 +22,94 @@ const tgbot = new tgbotapi({
     }
 })
 
+function writelog(e, a, b, c, d){
+    let time = '['+(new Date()).toLocaleTimeString('en-US', { hour12: false })+']'
+    let tag = '[' + e + ']'
+    if(e == "NMSG") console.log(time.cyan, tag.green, 'from', b.magenta, '(', a, ')')
+    else if(e == "INFO") console.log(time.cyan, tag.green, a)
+    else if(e== "MSG") console.log(time.cyan, tag.green, a.magenta + ' : ' + b)
+}
+
+const port = config.port || 3000
+app.listen(port, () => writelog('INFO', 'server is running at port ' + port))
+
 linebot.on('message', e => {
-    console.log(e)
-    if(e.message.type == 'text'){
-        e.reply("妳不是要用來傳圖片的嗎(?").then(data => {}).catch(err => {
-            throw err
-        })
-    }
-    if(e.message.type == 'image'){
-        e.message.content().then(pic64 => {
-            fs.writeFile('newpic.jpg', pic64, 'binary', err => {
-                if(err) throw err
-                tgbot.sendPhoto({
-                    chat_id: 210802475,
-                    caption: 'Picture from ' ,
-                    photo: './newpic.jpg'
-                }).then(data => {
-                    console.log(data)
+    e.source.profile().then(prof => {
+        let userID = e.source.userId
+        let username = prof.displayName
+        writelog('NMSG', userID, username)
+        if(userID == config.ayane_lineID){
+            if(e.message.type == 'text'){
+                writelog('MSG', username, e.message.text)
+                tgbot.sendMessage({
+                    chat_id: config.self_tgID,
+                    text: 'Message from ' + username + ':\n' + e.message.text
+                })
+            }
+            if(e.message.type == 'image'){
+                writelog('MSG', username, '[image]')
+                e.message.content().then(pic64 => {
+                    fs.writeFile('newpic.jpg', pic64, 'binary', err => {
+                        if(err) throw err
+                        tgbot.sendPhoto({
+                            chat_id: config.self_tgID,
+                            caption: 'Picture from ' + username,
+                            photo: './newpic.jpg'
+                        }).then(() => {
+                            tgbot.sendPhoto({
+                                chat_id: config.inari_tgID,
+                                photo: './newpic.jpg'
+                            }).then(data => {
+                                writelog('INFO', 'Picture send.')
+                            })
+                        })
+                    })
+                })
+            }
+            else{
+                let msg = 'send a unknown message.'
+                writelog('MSG', username, msg)
+                tgbot.sendMessage({
+                    chat_id: config.self_tgID,
+                    text: username + msg
+                })
+            }
+        }
+        else if(userID == config.self_lineID){
+            if(e.message.type == 'text'){
+                writelog('MSG', username, e.message.text)
+                tgbot.sendMessage({
+                    chat_id: config.self_tgID,
+                    text: 'Message from ' + username + ':\n' + e.message.text
+                })
+            }
+            if(e.message.type == 'image'){
+                writelog('MSG', username, '[image]')
+                e.message.content().then(pic64 => {
+                    fs.writeFile('newpic.jpg', pic64, 'binary', err => {
+                        if(err) throw err
+                        tgbot.sendPhoto({
+                            chat_id: config.self_tgID,
+                            caption: 'Picture from myself',
+                            photo: './newpic.jpg'
+                        }).then(() => {
+                            writelog('INFO', 'Picture send.')
+                        })
+                    })
+                })
+            }
+        }
+        else{
+            e.reply('Please contect edisonhello2 for more information.').then(data => {
+                let msg = username + ' send a message' + ( e.message.type == 'text' ? ':\n' + e.message.text : '')
+                writelog('MSG', msg)
+                tgbot.sendMessage({
+                    chat_id: config.self_tgID,
+                    text: msg
                 })
             })
-        })
-    }
+        }
+    })
 })
 tgbot.on('message', msg => {
     console.log(msg)
