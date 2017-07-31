@@ -48,20 +48,27 @@ linebot.on('message', e => {
             }
             if(e.message.type == 'image'){
                 writelog('MSG', username, '[image]')
+                const filename = new Date().toISOString().replace(/[-:]/g,'').replace('T','-').substr(0,15) + ':' + userID + '.jpg'
                 e.message.content().then(pic64 => {
-                    fs.writeFile('newpic.jpg', pic64, 'binary', err => {
+                    fs.writeFile(filename, pic64, 'binary', err => {
                         if(err) throw err
-                        tgbot.sendPhoto({
-                            chat_id: config.self_tgID,
-                            caption: 'Picture from ' + username,
-                            photo: './newpic.jpg'
-                        }).then(() => {
-                            tgbot.sendPhoto({
-                                chat_id: config.inari_tgID,
-                                photo: './newpic.jpg'
-                            }).then(data => {
-                                writelog('INFO', 'Picture send.')
-                            })
+                        // tgbot.sendPhoto({
+                        //     chat_id: config.self_tgID,
+                        //     caption: 'Picture from ' + username,
+                        //     photo: filename
+                        // }).then(() => {
+                        //     tgbot.sendPhoto({
+                        //         chat_id: config.ayane_tgID,
+                        //         photo: filename
+                        //     }).then(data => {
+                        //         writelog('INFO', 'Picture send.')
+                        //     })
+                        // })
+                        tgbot.secdPhoto({
+                            chat_id: config.ayane_tgID,
+                            photo: filename
+                        }).then(data => {
+                            writelog('INFO', 'Picture send.')
                         })
                     })
                 })
@@ -84,14 +91,15 @@ linebot.on('message', e => {
                 })
             }
             if(e.message.type == 'image'){
+                const filename = new Date().toISOString().replace(/[-:]/g,'').replace('T','-').substr(0,15) + ':' + userID + '.jpg'
                 writelog('MSG', username, '[image]')
                 e.message.content().then(pic64 => {
-                    fs.writeFile('newpic.jpg', pic64, 'binary', err => {
+                    fs.writeFile(filename, pic64, 'binary', err => {
                         if(err) throw err
                         tgbot.sendPhoto({
                             chat_id: config.self_tgID,
                             caption: 'Picture from myself',
-                            photo: './newpic.jpg'
+                            photo: filename
                         }).then(() => {
                             writelog('INFO', 'Picture send.')
                         })
