@@ -33,6 +33,8 @@ function writelog(e, a, b, c, d){
 const port = config.port || 3000
 app.listen(port, () => writelog('INFO', 'server is running at port ' + port))
 
+var pic_num = 0
+
 linebot.on('message', e => {
     e.source.profile().then(prof => {
         let userID = e.source.userId
@@ -48,17 +50,19 @@ linebot.on('message', e => {
             }
             if(e.message.type == 'image'){
                 writelog('MSG', username, '[image]')
+                const filename = 'pic' + pic_num + '.jpg'
+                picnum++
                 e.message.content().then(pic64 => {
-                    fs.writeFile('newpic.jpg', pic64, 'binary', err => {
+                    fs.writeFile(filename, pic64, 'binary', err => {
                         if(err) throw err
                         tgbot.sendPhoto({
                             chat_id: config.self_tgID,
                             caption: 'Picture from ' + username,
-                            photo: './newpic.jpg'
+                            photo: filename
                         }).then(() => {
                             tgbot.sendPhoto({
-                                chat_id: config.inari_tgID,
-                                photo: './newpic.jpg'
+                                chat_id: config.ayane_tgID,
+                                photo: filename
                             }).then(data => {
                                 writelog('INFO', 'Picture send.')
                             })
@@ -84,14 +88,15 @@ linebot.on('message', e => {
                 })
             }
             if(e.message.type == 'image'){
+                const filename = 'pic' + pic_num + '.jpg'
                 writelog('MSG', username, '[image]')
                 e.message.content().then(pic64 => {
-                    fs.writeFile('newpic.jpg', pic64, 'binary', err => {
+                    fs.writeFile(filename, pic64, 'binary', err => {
                         if(err) throw err
                         tgbot.sendPhoto({
                             chat_id: config.self_tgID,
                             caption: 'Picture from myself',
-                            photo: './newpic.jpg'
+                            photo: filename
                         }).then(() => {
                             writelog('INFO', 'Picture send.')
                         })
