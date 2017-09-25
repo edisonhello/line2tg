@@ -46,9 +46,10 @@ linebot.on('message', e => {
                     text: 'Message from ' + username + ':\n' + e.message.text
                 })
             }
-            if(e.message.type == 'image'){
+            else if(e.message.type == 'image'){
                 writelog('MSG', username, '[image]')
-                const filename = new Date().toISOString().replace(/[-:]/g,'').replace('T','-').substr(0,15) + ':' + userID + '.jpg'
+                filename = new Date().toISOString().replace(/[-:]/g,'').replace('T','-').substr(0,15) + ':' + userID + '.jpg'
+                filename = 'logs/' + filename
                 e.message.content().then(pic64 => {
                     fs.writeFile(filename, pic64, 'binary', err => {
                         if(err) throw err
@@ -64,7 +65,7 @@ linebot.on('message', e => {
                         //         writelog('INFO', 'Picture send.')
                         //     })
                         // })
-                        tgbot.secdPhoto({
+                        tgbot.sendPhoto({
                             chat_id: config.ayane_tgID,
                             photo: filename
                         }).then(data => {
@@ -90,8 +91,9 @@ linebot.on('message', e => {
                     text: 'Message from ' + username + ':\n' + e.message.text
                 })
             }
-            if(e.message.type == 'image'){
+            else if(e.message.type == 'image'){
                 const filename = new Date().toISOString().replace(/[-:]/g,'').replace('T','-').substr(0,15) + ':' + userID + '.jpg'
+                filename = 'logs/' + filename
                 writelog('MSG', username, '[image]')
                 e.message.content().then(pic64 => {
                     fs.writeFile(filename, pic64, 'binary', err => {
